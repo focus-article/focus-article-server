@@ -1,0 +1,30 @@
+{
+  "name": "focus-article-server",
+  "module": "src/index.ts",
+  "type": "module",
+  "scripts": {
+    "test": "bun test --test-globals",
+    "lint": "bun x prettier --write .",
+    "watch": "bun run --watch src/index.ts"
+  },
+  "private": true,
+  "devDependencies": {
+    "@types/bun": "latest",
+    "@types/express": "^5.0.3",
+    "@types/supertest": "^6.0.3",
+    "supertest": "^7.1.4"
+  },
+  "peerDependencies": {
+    "typescript": "^5"
+  },
+  "dependencies": {
+    "@asteasolutions/zod-to-openapi": "^8.1.0",
+    "@modelcontextprotocol/sdk": "^1.17.4",
+    "@types/cors": "^2.8.19",
+    "@types/swagger-ui-express": "^4.1.8",
+    "cors": "^2.8.5",
+    "express": "^5.1.0",
+    "swagger-ui-express": "^5.0.1",
+    "zod": "^4.0.17"
+  }
+}

@@ -1,0 +1,42 @@
+
+GET http://localhost:3001/articles?tag=estudo&size=2
+
+###
+GET http://localhost:3001/articles
+
+###
+POST http://localhost:3001/articles
+Content-Type: application/json
+
+{
+  "title": "There’s no such thing as a CSS reset | Adam Stoddard",
+  "url": "https://aaadaaam.com/notes/useful-defaults/",
+  "tags": "",
+  "status": "unread",
+  "author": "",
+  "image": "https://aaadaaam.com/assets/og-1200x630.jpg",
+  "publicationDate": "",
+  "readTime": 12,
+  "description": "There's only directly useful defaults, or not."
+}
+
+###
+POST http://localhost:3001/articles
+Content-Type: application/json
+
+{
+  "title": "Article 1",
+  "url": "/articles",
+  "tags": "baz"
+}
+
+###
+PATCH http://localhost:3001/articles/453
+Content-Type: application/json
+
+{
+  "title": "teste patch"
+}
+
+###
+
