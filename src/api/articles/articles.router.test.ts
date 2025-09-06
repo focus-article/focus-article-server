@@ -52,7 +52,7 @@ describe("Articles Router", () => {
         tags: "foo",
       });
       const res = await supertest(app).get("/articles?tag=baz").expect(200);
-      expect(res.body.data.length).toBe(1);
+      expect(res.body.data.articles.length).toBe(1);
     });
 
     it("should return when status is provided", async () => {
@@ -67,7 +67,7 @@ describe("Articles Router", () => {
         status: "read",
       });
       const res = await supertest(app).get("/articles?status=read").expect(200);
-      expect(res.body.data.length).toBe(1);
+      expect(res.body.data.articles.length).toBe(1);
     });
 
     it("should return just one item when size 1 is provided", async () => {
@@ -85,23 +85,23 @@ describe("Articles Router", () => {
 
       res = await supertest(app).get("/articles").expect(200);
 
-      expect(res.body.data.length).toBe(2);
+      expect(res.body.data.articles.length).toBe(2);
 
       res = await supertest(app).get("/articles?size=1").expect(200);
 
-      expect(res.body.data.length).toBe(1);
+      expect(res.body.data.articles.length).toBe(1);
     });
 
     it("Should return 10 itens by default", async () => {
       await addArticles(11);
       const res = await supertest(app).get("/articles").expect(200);
-      expect(res.body.data.length).toBe(10);
+      expect(res.body.data.articles.length).toBe(10);
     });
 
     it("Should return 5 itens when defined", async () => {
       await addArticles(11);
       const res = await supertest(app).get("/articles?size=5").expect(200);
-      expect(res.body.data.length).toBe(5);
+      expect(res.body.data.articles.length).toBe(5);
     });
 
     it("Should return 1 item for page 3 when 11 are persited", async () => {
@@ -109,29 +109,29 @@ describe("Articles Router", () => {
       const res = await supertest(app)
         .get("/articles?size=5&page=3")
         .expect(200);
-      expect(res.body.data.length).toBe(1);
+      expect(res.body.data.articles.length).toBe(1);
     });
 
     it("Should return all items", async () => {
       await addArticles(11);
       const res = await supertest(app).get("/articles?size=-1").expect(200);
-      expect(res.body.data.length).toBe(11);
+      expect(res.body.data.articles.length).toBe(11);
     });
 
     it("Should return all itens in DESC order by default", async () => {
       await addArticles(3);
       const res = await supertest(app).get("/articles").expect(200);
-      expect(res.body.data[0].title).toBe("Article 2");
-      expect(res.body.data[1].title).toBe("Article 1");
-      expect(res.body.data[2].title).toBe("Article 0");
+      expect(res.body.data.articles[0].title).toBe("Article 2");
+      expect(res.body.data.articles[1].title).toBe("Article 1");
+      expect(res.body.data.articles[2].title).toBe("Article 0");
     });
 
     it("Should return all itens in ASC when defined", async () => {
       await addArticles(3);
       const res = await supertest(app).get("/articles?order=asc").expect(200);
-      expect(res.body.data[0].title).toBe("Article 0");
-      expect(res.body.data[1].title).toBe("Article 1");
-      expect(res.body.data[2].title).toBe("Article 2");
+      expect(res.body.data.articles[0].title).toBe("Article 0");
+      expect(res.body.data.articles[1].title).toBe("Article 1");
+      expect(res.body.data.articles[2].title).toBe("Article 2");
     });
 
     it("Should return only favorite", async () => {
@@ -148,9 +148,9 @@ describe("Articles Router", () => {
       const res = await supertest(app)
         .get("/articles?favorite=true")
         .expect(200);
-      expect(res.body.data.length).toBe(1);
-      expect(res.body.data[0].favorite).toBe(true);
-      expect(res.body.data[0].title).toBe("Article 1");
+      expect(res.body.data.articles.length).toBe(1);
+      expect(res.body.data.articles[0].favorite).toBe(true);
+      expect(res.body.data.articles[0].title).toBe("Article 1");
     });
 
     it("Should return only not favorite", async () => {
@@ -167,9 +167,9 @@ describe("Articles Router", () => {
       const res = await supertest(app)
         .get("/articles?favorite=false")
         .expect(200);
-      expect(res.body.data.length).toBe(1);
-      expect(res.body.data[0].favorite).toBe(false);
-      expect(res.body.data[0].title).toBe("Article 2");
+      expect(res.body.data.articles.length).toBe(1);
+      expect(res.body.data.articles[0].favorite).toBe(false);
+      expect(res.body.data.articles[0].title).toBe("Article 2");
     });
 
     it("should return both articles if favorite is not defined", async () => {
@@ -184,7 +184,18 @@ describe("Articles Router", () => {
         favorite: false,
       });
       const res = await supertest(app).get("/articles").expect(200);
-      expect(res.body.data.length).toBe(2);
+      expect(res.body.data.articles.length).toBe(2);
+    });
+
+    it("should return two tags in the body", async () => {
+      await addArticle({
+        title: "Article 1",
+        url: "/articles",
+        favorite: true,
+        tags: "a|b",
+      });
+      const res = await supertest(app).get("/articles").expect(200);
+      expect(res.body.data.tags).toEqual(["a", "b"]);
     });
   });
 

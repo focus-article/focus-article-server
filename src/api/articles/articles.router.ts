@@ -9,17 +9,21 @@ import {
 import type { EntityArticle } from "./articles.types.ts";
 
 export default (app: Express, db: Database) => {
-  app.get("/tags", async (req, res) => {
-    try {
-      const stmt = db.query(`
+  function getTags() {
+    const stmt = db.query(`
               select tags from articles
               where tags IS NOT NULL
                 and tags <> ''
               group by tags;
         `);
-      const rows = stmt.all();
+    const rows = stmt.all();
+    return tagsFromArticles(rows as any);
+  }
+
+  app.get("/tags", async (req, res) => {
+    try {
       res.json({
-        tags: tagsFromArticles(rows as any),
+        tags: getTags(),
       });
     } catch (e) {
       console.error(e);
@@ -71,7 +75,10 @@ export default (app: Express, db: Database) => {
       res.json({
         page,
         limit,
-        data: (rows as EntityArticle[]).map(toResponseDto),
+        data: {
+          articles: (rows as EntityArticle[]).map(toResponseDto),
+          tags: getTags(),
+        },
       });
     } catch (e) {
       console.error(e);
