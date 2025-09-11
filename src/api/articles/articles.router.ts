@@ -7,16 +7,16 @@ import {
   tagsFromArticles,
 } from "./articles.utils.ts";
 import type { EntityArticle } from "./articles.types.ts";
+import { getArticles } from "../../core/get-articles/get-articles.ts";
+import { createArticle } from "../../core/create-article/create-articles.ts";
+import { updateArticle } from "../../core/update-article/update-article.ts";
+import { getArticle } from "../../core/get-article/get-article.ts";
+import { deleteArticle } from "../../core/delete-article/delete-article.ts";
+import { getTags as getTagsCore } from "../../core/get-tags/get-tags.ts";
 
 export default (app: Express, db: Database) => {
   function getTags() {
-    const stmt = db.query(`
-              select tags from articles
-              where tags IS NOT NULL
-                and tags <> ''
-              group by tags;
-        `);
-    const rows = stmt.all();
+    const rows = getTagsCore(db);
     return tagsFromArticles(rows as any);
   }
 
@@ -52,25 +52,19 @@ export default (app: Express, db: Database) => {
 
     const tag = req.query.tag as string | null;
     const status = req.query.status as string | null;
-    const offset = (page - 1) * limit;
+
     try {
-      const stmt = db.query(`
-            SELECT * FROM articles
-                     where (? is null or tags like ?)
-                     and (? is null or status = ?)
-                     and (? is null or favorite = ?)
-                     ORDER BY id ${order}, read_time ${orderReadTime}
-                     LIMIT ? OFFSET ?
-        `);
-      const rows = stmt.all(
-        tag,
-        `%${tag}%`,
-        status,
-        status,
-        favorite,
-        favorite,
-        limit,
-        offset,
+      const rows = getArticles(
+        {
+          page,
+          limit,
+          order,
+          orderReadTime,
+          tag,
+          status,
+          favorite,
+        },
+        db,
       );
       res.json({
         page,
@@ -97,32 +91,7 @@ export default (app: Express, db: Database) => {
       return;
     }
     try {
-      const stmt = db.query(`
-            INSERT INTO articles (
-                                  title,
-                                  url,
-                                  tags,
-                                  status,
-                                  author,
-                                  image,
-                                  publication_date,
-                                  read_time,
-                                  description,
-                                  favorite
-            ) values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-        `);
-      const result = stmt.run(
-        article.title,
-        article.url,
-        article.tags ?? null,
-        article.status ?? "unread",
-        article.author ?? null,
-        article.image ?? null,
-        article.publicationDate ?? null,
-        article.readTime ?? null,
-        article.description ?? null,
-        article.favorite ?? null,
-      );
+      const result = createArticle(article, db);
       res.json({
         ...toResponseDto(article),
         id: result.lastInsertRowid,
@@ -144,50 +113,10 @@ export default (app: Express, db: Database) => {
       return;
     }
 
-    const {
-      title,
-      url,
-      tags,
-      status,
-      author,
-      image,
-      publication_date,
-      read_time,
-      description,
-      favorite,
-    } = article;
-
     try {
       let stmt;
-
-      stmt = db.query(`
-        UPDATE articles
-        SET title = coalesce(?, title),
-            url = coalesce(?, url),
-            tags = coalesce(?, tags),
-            status = coalesce(?, status),
-            author = coalesce(?, author),
-            image = coalesce(?, image),
-            publication_date = coalesce(?, publication_date),
-            read_time = coalesce(?, read_time),
-            description = coalesce(?, description),
-            favorite = coalesce(?, favorite)
-        WHERE id = ?
-      `);
-      stmt.run(
-        title,
-        url,
-        tags,
-        status,
-        author,
-        image,
-        publication_date,
-        read_time,
-        description,
-        favorite,
-        id,
-      );
-      stmt = db.query(`SELECT * FROM articles WHERE id = ?`).get(id);
+      updateArticle({ ...article, id }, db);
+      stmt = getArticle(id, db);
 
       res.status(200).json(toResponseDto(stmt as EntityArticle));
     } catch (e) {
@@ -200,7 +129,7 @@ export default (app: Express, db: Database) => {
   app.delete("/articles/:id", (req, res) => {
     const id = req.params.id;
     try {
-      db.query(`DELETE FROM articles WHERE id = ?`).run(id);
+      deleteArticle(id, db);
       res.status(200).end();
     } catch (e) {
       const message =
