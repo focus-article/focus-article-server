@@ -18,7 +18,7 @@ export type EntityArticle = {
   favorite: number;
   author: string;
   image: string;
-  tags: string;
+  tags: string[];
   time_added: number;
   publication_date: string;
   read_time: number;

@@ -1,11 +1,14 @@
 import type { Database } from "bun:sqlite";
 
-export function getTags(db: Database) {
+interface Tags {
+  name: string;
+}
+
+export function getTags(db: Database): string[] {
   const stmt = db.query(`
-              select tags from articles
-              where tags IS NOT NULL
-                and tags <> ''
-              group by tags;
+              select distinct name from tags
+              -- only list tags that're being used by articles
+              join articles_tags at on tags.id = at.tag_id
         `);
-  return stmt.all();
+  return (stmt.all() as Tags[]).map((row) => row.name);
 }

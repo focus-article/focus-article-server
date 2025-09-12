@@ -7,7 +7,6 @@ export default (db: Database) => {
         title TEXT NOT NULL,
         url TEXT NOT NULL,
         time_added INTEGER,
-        tags TEXT,
         status TEXT,
         author TEXT,
         image TEXT,
@@ -16,5 +15,20 @@ export default (db: Database) => {
         description TEXT,
         favorite INTEGER
       )
-`);
+  `);
+  db.run(`
+        CREATE TABLE IF NOT EXISTS tags (
+          id   INTEGER PRIMARY KEY AUTOINCREMENT,
+          name TEXT NOT NULL UNIQUE
+        );
+  `);
+  db.run(`
+        CREATE TABLE IF NOT EXISTS articles_tags (
+           article_id INTEGER NOT NULL,
+           tag_id     INTEGER NOT NULL,
+           PRIMARY KEY (article_id, tag_id),
+           FOREIGN KEY (article_id) REFERENCES articles(id) ON DELETE CASCADE,
+           FOREIGN KEY (tag_id) REFERENCES tags(id) ON DELETE CASCADE
+        );
+  `);
 };

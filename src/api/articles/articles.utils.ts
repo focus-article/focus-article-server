@@ -7,7 +7,7 @@ export function isArticleDtoCreateValid(article: Partial<ArticleDto>) {
   const schema = z.object({
     title: z.string(),
     url: z.string(),
-    tags: z.string().optional(),
+    tags: z.array(z.string()).optional(),
     author: z.string().optional(),
     image: z.string().optional(),
     publicationDate: z.string().optional(),
@@ -22,7 +22,7 @@ export function isArticleDtoPatchValid(article: Partial<ArticleDto>) {
   const schema = z.object({
     title: z.string().optional(),
     url: z.string().optional(),
-    tags: z.string().optional(),
+    tags: z.array(z.string()).optional(),
     author: z.string().optional(),
     image: z.string().optional(),
     publicationDate: z.string().optional(),
@@ -60,16 +60,11 @@ export function toResponseDto(article: EntityArticle): ArticleDto {
   // @ts-ignore
   delete article.publication_date;
 
-  const tags = article.tags !== "" ? article?.tags?.split("|") : [];
-  // @ts-ignore
-  delete article?.tags;
-
   return {
     ...article,
     favorite: !!article.favorite,
     readTime,
     timeAdded,
     publicationDate,
-    tags,
   };
 }

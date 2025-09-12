@@ -1,10 +1,11 @@
 import type { Database } from "bun:sqlite";
+import { createTag } from "../create-tag/create-tag.ts";
 
 export function createArticle(
   article: {
     title: string;
     url: string;
-    tags?: string;
+    tags?: string[];
     status?: string;
     author?: string;
     image?: string;
@@ -16,23 +17,21 @@ export function createArticle(
   db: Database,
 ) {
   const stmt = db.query(`
-            INSERT INTO articles (
-                                  title,
-                                  url,
-                                  tags,
-                                  status,
-                                  author,
-                                  image,
-                                  publication_date,
-                                  read_time,
-                                  description,
-                                  favorite
-            ) values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-        `);
-  return stmt.run(
+    INSERT INTO articles (
+      title,
+      url,
+      status,
+      author,
+      image,
+      publication_date,
+      read_time,
+      description,
+      favorite
+    ) values (?, ?, ?, ?, ?, ?, ?, ?, ?)
+  `);
+  const result = stmt.run(
     article.title,
     article.url,
-    article.tags ?? null,
     article.status ?? "unread",
     article.author ?? null,
     article.image ?? null,
@@ -41,4 +40,16 @@ export function createArticle(
     article.description ?? null,
     article.favorite ?? null,
   );
+  const article_id = result.lastInsertRowid;
+
+  article.tags?.forEach((_tag) => {
+    if (_tag) {
+      const tag_id = createTag(_tag, db);
+      db.query(
+        `insert into articles_tags (tag_id, article_id) values (?, ?)`,
+      ).run(tag_id as number, article_id);
+    }
+  });
+
+  return result;
 }

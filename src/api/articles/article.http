@@ -1,8 +1,11 @@
 
+GET http://localhost:3001/articles?size=-1
+
+###
 GET http://localhost:3001/articles?tag=estudo&size=2
 
 ###
-GET http://localhost:3001/articles
+GET http://localhost:3001/articles?status=read
 
 ###
 POST http://localhost:3001/articles

@@ -34,7 +34,7 @@ describe("Articles Router", () => {
       await addArticle({
         title: `Article ${i}`,
         url: "/articles",
-        tags: "baz",
+        tags: ["baz"],
       });
     }
   }
@@ -44,12 +44,12 @@ describe("Articles Router", () => {
       await addArticle({
         title: "Article 1",
         url: "/articles",
-        tags: "baz",
+        tags: ["baz"],
       });
       await addArticle({
         title: "Article 1",
         url: "/articles",
-        tags: "foo",
+        tags: ["foo"],
       });
       const res = await supertest(app).get("/articles?tag=baz").expect(200);
       expect(res.body.data.articles.length).toBe(1);
@@ -74,12 +74,12 @@ describe("Articles Router", () => {
       await addArticle({
         title: "Article 1",
         url: "/articles",
-        tags: "baz",
+        tags: ["baz"],
       });
       await addArticle({
         title: "Article 1",
         url: "/articles",
-        tags: "foo",
+        tags: ["foo"],
       });
       let res;
 
@@ -128,6 +128,7 @@ describe("Articles Router", () => {
 
     it("Should return all itens in ASC when defined", async () => {
       await addArticles(3);
+      console.log(db.query("SELECT * FROM articles").all());
       const res = await supertest(app).get("/articles?order=asc").expect(200);
       expect(res.body.data.articles[0].title).toBe("Article 0");
       expect(res.body.data.articles[1].title).toBe("Article 1");
@@ -187,14 +188,15 @@ describe("Articles Router", () => {
       expect(res.body.data.articles.length).toBe(2);
     });
 
-    it("should return two tags in the body", async () => {
+    it("should return two tags in the body and in the article", async () => {
       await addArticle({
         title: "Article 1",
         url: "/articles",
         favorite: true,
-        tags: "a|b",
+        tags: ["a", "b"],
       });
       const res = await supertest(app).get("/articles").expect(200);
+      expect(res.body.data.articles[0].tags).toEqual(["a", "b"]);
       expect(res.body.data.tags).toEqual(["a", "b"]);
     });
   });
@@ -204,14 +206,15 @@ describe("Articles Router", () => {
       await addArticle({
         title: "Article 1",
         url: "/article1",
-        tags: "Node|ypescript",
+        tags: ["Node", "typescript"],
       });
       await addArticle({
         title: "Article 2",
         url: "/article2",
-        tags: "ai|node",
+        tags: ["ai", "node"],
       });
-      const res = await supertest(app).get("/tags").expect(200);
+      const res = await supertest(app).get("/tags");
+      console.log(res.body);
       expect(res.body.tags.length).toBe(3);
     });
   });
@@ -294,7 +297,7 @@ describe("Articles Router", () => {
       await addArticle({
         title: "Article 1",
         url: "/articles",
-        tags: "foo",
+        tags: ["foo"],
       });
 
       const result = await supertest(app)
@@ -312,7 +315,7 @@ describe("Articles Router", () => {
       await addArticle({
         title: "Article 1",
         url: "/articles",
-        tags: "foo",
+        tags: ["foo"],
       });
       const result = await supertest(app)
         .patch("/articles/1")
@@ -327,7 +330,7 @@ describe("Articles Router", () => {
       await addArticle({
         title: "Article 1",
         url: "/articles",
-        tags: "foo",
+        tags: ["foo"],
       });
 
       const update = (status: string) =>

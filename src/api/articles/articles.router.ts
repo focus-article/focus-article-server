@@ -12,18 +12,13 @@ import { createArticle } from "../../core/create-article/create-articles.ts";
 import { updateArticle } from "../../core/update-article/update-article.ts";
 import { getArticle } from "../../core/get-article/get-article.ts";
 import { deleteArticle } from "../../core/delete-article/delete-article.ts";
-import { getTags as getTagsCore } from "../../core/get-tags/get-tags.ts";
+import { getTags } from "../../core/get-tags/get-tags.ts";
 
 export default (app: Express, db: Database) => {
-  function getTags() {
-    const rows = getTagsCore(db);
-    return tagsFromArticles(rows as any);
-  }
-
   app.get("/tags", async (req, res) => {
     try {
       res.json({
-        tags: getTags(),
+        tags: getTags(db),
       });
     } catch (e) {
       console.error(e);
@@ -71,7 +66,7 @@ export default (app: Express, db: Database) => {
         limit,
         data: {
           articles: (rows as EntityArticle[]).map(toResponseDto),
-          tags: getTags(),
+          tags: getTags(db),
         },
       });
     } catch (e) {
@@ -97,6 +92,7 @@ export default (app: Express, db: Database) => {
         id: result.lastInsertRowid,
       });
     } catch (e) {
+      console.error(e);
       const message = "There was an internal error trying to insert article";
       res.status(500).json({ message });
     }
@@ -116,10 +112,11 @@ export default (app: Express, db: Database) => {
     try {
       let stmt;
       updateArticle({ ...article, id }, db);
-      stmt = getArticle(id, db);
+      stmt = getArticle(+id, db);
 
       res.status(200).json(toResponseDto(stmt as EntityArticle));
     } catch (e) {
+      console.error(e);
       const message =
         "There was an internal error trying to update the article";
       res.status(500).send({ message });
