@@ -33,21 +33,6 @@ export function isArticleDtoPatchValid(article: Partial<ArticleDto>) {
   return schema.parse(article);
 }
 
-export const tagsFromArticles = (
-  databaseTags: { tags: string }[],
-): string[] => {
-  return [
-    ...new Set(
-      databaseTags
-        .map((database) => database.tags)
-        .filter((tags) => !!tags)
-        .map((tags) => tags?.split("|"))
-        .flatMap((tag) => tag)
-        .map((tag) => tag?.toLowerCase()),
-    ),
-  ];
-};
-
 // @ts-ignore
 export function toResponseDto(article: EntityArticle): ArticleDto {
   const readTime = article.read_time;

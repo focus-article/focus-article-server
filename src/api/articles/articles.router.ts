@@ -4,7 +4,6 @@ import {
   isArticleDtoCreateValid,
   isArticleDtoPatchValid,
   toResponseDto,
-  tagsFromArticles,
 } from "./articles.utils.ts";
 import type { EntityArticle } from "./articles.types.ts";
 import { getArticles } from "../../core/get-articles/get-articles.ts";
@@ -45,7 +44,7 @@ export default (app: Express, db: Database) => {
     const orderReadTime =
       req.query.orderTime?.toString()?.toUpperCase() === "ASC" ? "ASC" : "DESC";
 
-    const tag = req.query.tag as string | null;
+    const tag = (req.query.tag as string) || null;
     const status = req.query.status as string | null;
 
     try {
@@ -55,7 +54,7 @@ export default (app: Express, db: Database) => {
           limit,
           order,
           orderReadTime,
-          tag,
+          tags: Array.isArray(tag) ? tag : tag ? [tag] : null,
           status,
           favorite,
         },

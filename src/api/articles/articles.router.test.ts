@@ -55,6 +55,23 @@ describe("Articles Router", () => {
       expect(res.body.data.articles.length).toBe(1);
     });
 
+    it("should return articles for multiple tags", async () => {
+      await addArticle({
+        title: "Article 1",
+        url: "/articles",
+        tags: ["baz", "foo"],
+      });
+      await addArticle({
+        title: "Article 1",
+        url: "/articles",
+        tags: ["foo"],
+      });
+      const res = await supertest(app)
+        .get("/articles?tag=baz&tag=foo")
+        .expect(200);
+      expect(res.body.data.articles.length).toBe(1);
+    });
+
     it("should return when status is provided", async () => {
       await addArticle({
         title: "Article 1",
@@ -128,7 +145,6 @@ describe("Articles Router", () => {
 
     it("Should return all itens in ASC when defined", async () => {
       await addArticles(3);
-      console.log(db.query("SELECT * FROM articles").all());
       const res = await supertest(app).get("/articles?order=asc").expect(200);
       expect(res.body.data.articles[0].title).toBe("Article 0");
       expect(res.body.data.articles[1].title).toBe("Article 1");
@@ -214,7 +230,6 @@ describe("Articles Router", () => {
         tags: ["ai", "node"],
       });
       const res = await supertest(app).get("/tags");
-      console.log(res.body);
       expect(res.body.tags.length).toBe(3);
     });
   });
