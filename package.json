@@ -6,7 +6,7 @@
     "test": "bun test --test-globals",
     "lint": "bun x prettier --write .",
     "watch": "bun run --watch src/index.ts",
-    "pm2": "pm2 start src/index.ts --interpreter=bun && pm2 startup && pm2 save"
+    "pm2": "pm2 start src/index.ts --interpreter=bun --name focus-article-server && pm2 startup && pm2 save"
   },
   "private": true,
   "devDependencies": {
