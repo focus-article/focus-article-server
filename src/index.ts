@@ -19,5 +19,5 @@ configDatabase(db);
 configServer(app, db);
 
 app.listen(3001, () => {
-  console.log("🚀 API running at http://localhost:3002");
+  console.log("🚀 API running at http://localhost:3001");
 });
