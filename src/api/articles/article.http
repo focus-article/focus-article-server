@@ -8,6 +8,9 @@ GET http://localhost:3001/articles?tag=estudo&size=2
 GET http://localhost:3001/articles?status=read
 
 ###
+GET http://localhost:3001/articles?status=read&article=javascript
+
+###
 POST http://localhost:3001/articles
 Content-Type: application/json
 

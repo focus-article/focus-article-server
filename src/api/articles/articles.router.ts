@@ -29,6 +29,7 @@ export default (app: Express, db: Database) => {
   app.get("/articles", (req, res) => {
     const page = parseInt(req.query.page as string) || 1;
     const limit = parseInt(req.query.size as string) || 10;
+    const search = (req.query.search as string) || null;
 
     let favorite = null;
 
@@ -57,6 +58,7 @@ export default (app: Express, db: Database) => {
           tags: Array.isArray(tag) ? tag : tag ? [tag] : null,
           status,
           favorite,
+          search,
         },
         db,
       );

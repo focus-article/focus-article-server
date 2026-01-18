@@ -9,6 +9,7 @@ export function getArticles(
     page: number;
     order: string;
     orderReadTime: string;
+    search: string | null;
   },
   db: Database,
 ) {
@@ -20,6 +21,7 @@ export function getArticles(
     favorite,
     order = "DESC",
     orderReadTime = "DESC",
+    search,
   } = params;
 
   function placeholders(arr: any[]) {
@@ -37,6 +39,11 @@ export function getArticles(
         WHERE (? IS NULL OR status = ?)
           AND (? IS NULL OR t.name IN (${tagPlaceholders}))
           AND (? IS NULL OR favorite = ?)
+          AND (
+            ? IS NULL
+                OR a.title COLLATE NOCASE LIKE '%' || ? || '%'
+                OR a.url   COLLATE NOCASE LIKE '%' || ? || '%'
+            )
         GROUP BY a.id
             ${
               tags?.length
@@ -56,6 +63,9 @@ export function getArticles(
     ...(tags ?? []), // espalha os valores do array de tags
     favorite,
     favorite,
+    search,
+    search,
+    search,
     limit,
     offset,
   );

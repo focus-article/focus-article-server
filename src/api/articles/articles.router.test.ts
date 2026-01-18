@@ -215,6 +215,50 @@ describe("Articles Router", () => {
       expect(res.body.data.articles[0].tags).toEqual(["a", "b"]);
       expect(res.body.data.tags).toEqual(["a", "b"]);
     });
+
+    it("should return article by title when passed search without case-sensitive", async () => {
+      const search = "article 1";
+      await addArticle({
+        title: search,
+        url: "/articles",
+        favorite: true,
+        tags: ["a", "b"],
+      });
+      await addArticle({
+        title: "article 2",
+        url: "/articles",
+        favorite: true,
+        tags: ["a", "b"],
+      });
+      const res = await supertest(app)
+        .get("/articles")
+        .query({ search: search.toUpperCase() })
+        .expect(200);
+      expect(res.body.data.articles.length).toEqual(1);
+      expect(res.body.data.articles[0].title).toEqual(search);
+    });
+
+    it("should return article by url when passed search without case-sensitive", async () => {
+      const search = "https://article1.com";
+      await addArticle({
+        title: "Title 1",
+        url: search,
+        favorite: true,
+        tags: ["a", "b"],
+      });
+      await addArticle({
+        title: "Title 2",
+        url: "https://article2.com",
+        favorite: true,
+        tags: ["a", "b"],
+      });
+      const res = await supertest(app)
+        .get("/articles")
+        .query({ search: search.toUpperCase() })
+        .expect(200);
+      expect(res.body.data.articles.length).toEqual(1);
+      expect(res.body.data.articles[0].url).toEqual(search);
+    });
   });
 
   describe("GET /tags", () => {
